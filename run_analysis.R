@@ -44,6 +44,7 @@ rownames(test_data) <- (nrow(train_data) + 1):(nrow(train_data) + nrow(test_data
 all_data <- rbind(test_data, train_data, all=TRUE)
 
 ## Map Activity number to label
+print("Mapping activities...")
 all_ax <- all_data[["Activity"]]
 for (i in 1:length(all_ax)) {
   all_data[i, "Activity"] <- activities[all_ax[i]]
@@ -52,9 +53,24 @@ for (i in 1:length(all_ax)) {
 ## Now, compute the average of each variable for each activity and each subject.
 ## Per the provided notes, there are 30 subjects, numbered 1:30.
 ## Also, there are 6 activities. So, we will have 180 rows of data.
+print("Running analysis...")
+final_data <- data.frame(matrix(nrow = 180, ncol = length(colnames(all_data)), dimnames=list(c(), colnames(all_data))))
+rnum = 1
+for (sub in 1:30) {
+  subject_data <- all_data[all_data["Subject"] == 1,]
+  for (ac in activities) {
+    ac_data <- subject_data[subject_data["Activity"] == ac,]
+    ac_data_means <- sapply(ac_data[,3:length(ac_data)], mean)
+    final_data[rnum, 1] <- sub
+    final_data[rnum, 2] <- ac
+    final_data[rnum, 3:length(final_data_matrix[1,])] <- ac_data_means
+    rnum <- rnum + 1
+  }
+}
 
-final_data <- data.frame(nrow=180, ncol=length(ncol(all_data)), col.names=colnames(all_data))
+## Output the final data as a csv file for uploading
+print("Wrinting output...")
+write.table(final_data, "./output.txt", row.name=FALSE)
 
-
-
-
+# The end
+print("All done.")
